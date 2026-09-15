@@ -13,9 +13,8 @@ import {initSearching} from "./components/searching.js";
 import {initPagination} from "./components/pagination.js";
 
 
-// Исходные данные используемые в render()
-const {data: sourceDataList, sellers, customers} = initData(sourceData);
-
+// API — прототип будущего API, пока работает с локальными данными
+const api = initData(sourceData);
 
 
 /**
@@ -78,9 +77,9 @@ appRoot.appendChild(sampleTable.container);
  * Перерисовка состояния таблицы при любых изменениях
  * @param {HTMLButtonElement?} action
  */
-function render(action) {
+async function render(action) {
     let state = collectState(sampleTable.container); 
-    let result = [...sourceDataList]; 
+    let query = {};
 
     // result = searchComponent(result, state, action);
 
@@ -93,7 +92,13 @@ function render(action) {
     // @todo: применение пагинации
     // result = applyPagination(result, state, action);
 
-    sampleTable.render(result);
+    const { total, items } = await api.getRecords(query);
+
+    sampleTable.render(items);
 }
 
-render();
+async function init() {
+    const indexes = await api.getIndexes();
+}
+
+init().then(render);
