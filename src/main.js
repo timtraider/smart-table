@@ -1,11 +1,8 @@
 import './fonts/ys-display/fonts.css'
 import './style.css'
-
 import {data as sourceData} from "./data/dataset_1.js";
-
 import {initData} from "./data.js";
 import {processFormData} from "./lib/utils.js";
-
 import {initTable} from "./components/table.js";
 import {initSorting} from "./components/sorting.js";
 import {initFiltering} from "./components/filtering.js";
@@ -20,7 +17,6 @@ const api = initData(sourceData);
 // собирает состояние полей из формы
 function collectState(container) {
     const state = processFormData(new FormData(container));
-
     const rowsPerPage = parseInt(state.rowsPerPage) || 10;    
     const page = parseInt(state.page) || 1;                   
 
@@ -39,14 +35,12 @@ const tableComponent = initTable({
     after: ['pagination']
 }, render);
 
-const searchComponent = initSearching(tableComponent.search.container);
+const {applySearching} = initSearching(tableComponent.search.container);
 
 const sampleTable = tableComponent;
 
-// пока закомментировал, потому что не уверен, что правильно работает с асинхронными данными
-// const applyFiltering = initFiltering(sampleTable.filter.elements, {
-//     searchBySeller: sellers
-// });
+// вроде как инициализация фильтрации
+const {applyFiltering, updateIndexes} = initFiltering(sampleTable.filter.elements);
 
 const applySorting = initSorting([
     sampleTable.header.elements.sortByDate,
@@ -71,16 +65,16 @@ appRoot.appendChild(sampleTable.container);
 
 // должна перерисовывать таблицу при любых изменениях
 async function render(action) {
-    // собираю текущее состояние полей из формы
+    
     let state = collectState(sampleTable.container); 
     // сюда буду собирать параметры для запроса на сервер, пока пустой объект
     let query = {};
 
-    // пока не использую, потом наверное добавлю
-    // result = searchComponent(result, state, action);
+    // применяю поиск
+    query = applySearching(query, state, action);
 
-    // применение фильтрации
-    // result = applyFiltering(result, state, action);
+    // применяю фильтрацию
+    query = applyFiltering(query, state, action);
 
     // применение сортировки
     // result = applySorting(result, state, action);
@@ -93,13 +87,18 @@ async function render(action) {
 
     // обновляю UI пагинатора — номер страницы и строки
     updatePagination(total, query); 
-    // рендерю таблицу с полученными данными
+    
     sampleTable.render(items);
 }
 
 // загружаю индексы, а потом уже рендерить
 async function init() {
     const indexes = await api.getIndexes();
+
+    // заполняю селект продавцами
+    updateIndexes(sampleTable.filter.elements, {
+        searchBySeller: indexes.sellers
+    });
 }
 
 init().then(render);

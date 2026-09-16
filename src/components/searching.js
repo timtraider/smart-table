@@ -1,15 +1,22 @@
-import {rules, createComparison} from "../lib/compare.js";
+// заполняет поле поиска начальным значением
+const updateSearch = (elements, value) => {
+    if (elements.search) {
+        elements.search.value = value;
+    }
+}
 
+// применяет поиск — формирует параметр search для запроса на сервер
+const applySearching = (query, state, action) => {
+    // если в state есть search и он не пустой — добавляю к query
+    if (state.search) {
+        query = Object.assign({}, query, { search: state.search });
+    }
+    return query;
+}
 
 export function initSearching(searchField) {
-    // @todo: #5.1 — настроить компаратор
-    const comparator = createComparison(
-        ['skipEmptyTargetValues'],
-        [rules.searchMultipleFields('search', ['date', 'customer', 'seller'], false)]
-    );
-
-    return (data, state, action) => {
-        // @todo: #5.2 — применить компаратор
-        return data.filter(row => comparator(row, state));
+    return {
+        updateSearch,
+        applySearching
     }
 }
