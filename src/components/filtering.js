@@ -19,6 +19,8 @@ const applyFiltering = (query, state, action) => {
         const input = parent.querySelector('input');
         if (input) {
             input.value = '';
+            // отредактировал фильтрацию согласно замечанию
+            state[input.name] = '';
         }
     }
 
