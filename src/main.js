@@ -10,7 +10,6 @@ import {initSearching} from "./components/searching.js";
 import {initPagination} from "./components/pagination.js";
 
 
-// API, пока что он работает с локальными данными
 const api = initData(sourceData);
 
 
@@ -39,7 +38,7 @@ const {applySearching} = initSearching(tableComponent.search.container);
 
 const sampleTable = tableComponent;
 
-// вроде как инициализация фильтрации
+// инициализация фильтрации
 const {applyFiltering, updateIndexes} = initFiltering(sampleTable.filter.elements);
 
 const applySorting = initSorting([
@@ -63,11 +62,10 @@ const {applyPagination, updatePagination} = initPagination(
 const appRoot = document.querySelector('#app');
 appRoot.appendChild(sampleTable.container);
 
-// должна перерисовывать таблицу при любых изменениях
+// функция перерисовки таблицы при любых изменениях
 async function render(action) {
     
     let state = collectState(sampleTable.container); 
-    // сюда буду собирать параметры для запроса на сервер, пока пустой объект
     let query = {};
 
     // применяю поиск
@@ -77,7 +75,7 @@ async function render(action) {
     query = applyFiltering(query, state, action);
 
     // применение сортировки
-    // result = applySorting(result, state, action);
+    query = applySorting(query, state, action);
 
     // добавляю к query параметры пагинации — страница и количество строк
     query = applyPagination(query, state, action);

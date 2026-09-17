@@ -7,7 +7,7 @@ const updateSearch = (elements, value) => {
 
 // применяет поиск — формирует параметр search для запроса на сервер
 const applySearching = (query, state, action) => {
-    // если в state есть search и он не пустой — добавляю к query
+    
     if (state.search) {
         query = Object.assign({}, query, { search: state.search });
     }
